@@ -36,21 +36,21 @@ pub struct Fs<'a> {
 }
 
 #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
-type DirEntryName = [u8; 256];
+type DirEntryName = [u8; libc::FILENAME_MAX as usize];
 #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
 fn convert_byte(b: u8) -> u8 {
     b
 }
 
 #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
-type DirEntryName = [i8; 256];
+type DirEntryName = [i8; libc::FILENAME_MAX as usize];
 #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
 fn convert_byte(b: u8) -> i8 {
     b as i8
 }
 
 #[cfg(target_os = "macos")]
-type DirEntryName = [i8; 256];
+type DirEntryName = [i8; libc::FILENAME_MAX as usize];
 #[cfg(target_os = "macos")]
 fn convert_byte(b: u8) -> i8 {
     b as i8
@@ -323,13 +323,13 @@ impl<'a> Fs<'a> {
                     None => unreachable!(),
                 };
                 let inode = self.get_inode_from_path(&full_path);
-                let mut buf: DirEntryName = [0; 256];
+                let mut buf: DirEntryName = [0; libc::FILENAME_MAX as usize];
                 full_path
                     .last()
                     .unwrap()
                     .as_bytes()
                     .iter()
-                    .take(255)
+                    .take(libc::FILENAME_MAX as usize - 1)
                     .enumerate()
                     .for_each(|(i, &b)| buf[i] = convert_byte(b));
 
